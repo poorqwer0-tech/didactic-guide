@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>WormGPT Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      background: #090d16 !important; 
+      color: #f1f5f9 !important; 
+      font-family: 'Inter', sans-serif !important;
+      height: 100vh !important; 
+      width: 100vw !important; 
+      overflow: hidden !important; 
+      display: flex !important; 
+      flex-direction: column !important;
+    }
+    #root { 
+      height: 100vh !important; 
+      width: 100vw !important; 
+      display: flex !important; 
+      flex-direction: column !important; 
+      overflow: hidden !important; 
+    }
+    .scanline {
+      width: 100%; height: 100px; z-index: 10;
+      background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(220,38,38,0.05) 50%, rgba(0,0,0,0) 100%);
+      opacity: 0.15; position: absolute; bottom: 100%; pointer-events: none;
+      animation: scanline 6s linear infinite;
+    }
+    @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100px; } }
+  </style>
+</head>
+<body class="overflow-hidden">
+  <div id="root"></div>
+  <div class="scanline"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

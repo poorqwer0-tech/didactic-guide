@@ -1,0 +1,79 @@
+import path from 'path';
+import { defineConfig, loadEnv, createLogger } from 'vite';
+import react from '@vitejs/plugin-react';
+
+const originalConsoleWarn = console.warn;
+console.warn = (...args) => {
+  const msg = args.join(' ');
+  if (msg.includes('Sourcemap') && msg.includes('points to missing source files')) return;
+  originalConsoleWarn(...args);
+};
+
+const logger = createLogger();
+const originalWarn = logger.warn;
+logger.warn = (msg, options) => {
+  if (msg.includes('Sourcemap') && msg.includes('points to missing source files')) return;
+  originalWarn(msg, options);
+};
+
+export default defineConfig(({ mode }) => {
+    const env = loadEnv(mode, '.', '');
+    return {
+      base: '/',
+      customLogger: logger,
+      publicDir: 'public',
+      server: {
+        port: 3000,
+        host: '0.0.0.0',
+        allowedHosts: true,
+        proxy: {
+          '/ollama-local': {
+            target: 'http://localhost:11434',
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/ollama-local/, '')
+          },
+          '/ollama-cloud': {
+            target: 'https://ollama.com',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/ollama-cloud/, '')
+          }
+        }
+      },
+      preview: {
+        port: 3000,
+        host: '0.0.0.0',
+        allowedHosts: true,
+        strictPort: true
+      },
+      build: {
+        outDir: 'dist',
+        sourcemap: false,
+        chunkSizeWarningLimit: 3000,
+        minify: 'esbuild',
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              vendor: ['react', 'react-dom'],
+              gemini: ['@google/genai'],
+              markdown: ['react-markdown', 'remark-gfm', 'rehype-raw', 'remark-math', 'rehype-katex'],
+            }
+          }
+        }
+      },
+      plugins: [react()],
+      define: {
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.API_KEY || ''),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.API_KEY || ''),
+        'process.env.GROQ_API_KEY': JSON.stringify(env.GROQ_API_KEY || '')
+      },
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, '.'),
+        }
+      },
+      optimizeDeps: {
+        exclude: ['@google/adk', 'express']
+      }
+    };
+});
